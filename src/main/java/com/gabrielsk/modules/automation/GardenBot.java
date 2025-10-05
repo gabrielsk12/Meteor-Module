@@ -6,7 +6,7 @@ import com.gabrielsk.ai.legit.Visibility;
 import com.gabrielsk.math.MathUtils;
 import com.gabrielsk.pathfinding.AStarPathfinder;
 import com.gabrielsk.pathfinding.PathfindingOptions;
-import com.gabrielsk.utils.PlayerMovement;
+
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -105,7 +105,7 @@ public class GardenBot extends Module {
         }
 
         // Face target and break
-        PlayerMovement.humanRotate(mc.player, Vec3d.ofCenter(currentTarget));
+        meteordevelopment.meteorclient.utils.player.Rotations.rotate(meteordevelopment.meteorclient.utils.player.Rotations.getYaw(Vec3d.ofCenter(currentTarget)), meteordevelopment.meteorclient.utils.player.Rotations.getPitch(Vec3d.ofCenter(currentTarget)));
         mc.interactionManager.attackBlock(currentTarget, Direction.UP);
         mc.player.swingHand(Hand.MAIN_HAND);
 
@@ -178,7 +178,7 @@ public class GardenBot extends Module {
         if (mc.player == null) return;
         Vec3d target = Vec3d.ofCenter(node);
         // Rotate towards target
-        PlayerMovement.humanRotate(mc.player, target);
+        meteordevelopment.meteorclient.utils.player.Rotations.rotate(meteordevelopment.meteorclient.utils.player.Rotations.getYaw(target), meteordevelopment.meteorclient.utils.player.Rotations.getPitch(target));
         // Apply gentle velocity towards node when on ground
         Vec3d diff = target.subtract(mc.player.getPos());
         Vec3d dir = new Vec3d(diff.x, 0, diff.z).normalize();

@@ -5,7 +5,7 @@ import com.gabrielsk.ai.legit.Humanizer;
 import com.gabrielsk.ai.legit.Visibility;
 import com.gabrielsk.pathfinding.AStarPathfinder;
 import com.gabrielsk.pathfinding.PathfindingOptions;
-import com.gabrielsk.utils.PlayerMovement;
+
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -127,7 +127,7 @@ public class WarehouseBot extends Module {
                     if (requireLos.get() && !Visibility.hasLineOfSight(mc, Vec3d.ofCenter(targetChest))) return;
                 }
                 // Face and open
-                PlayerMovement.humanRotate(mc.player, Vec3d.ofCenter(targetChest));
+                meteordevelopment.meteorclient.utils.player.Rotations.rotate(meteordevelopment.meteorclient.utils.player.Rotations.getYaw(Vec3d.ofCenter(targetChest)), meteordevelopment.meteorclient.utils.player.Rotations.getPitch(Vec3d.ofCenter(targetChest)));
                 BlockHitResult bhr = new BlockHitResult(Vec3d.ofCenter(targetChest), Direction.UP, targetChest, false);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 lastActionAt = System.currentTimeMillis();
@@ -187,7 +187,9 @@ public class WarehouseBot extends Module {
     }
 
     private boolean isFood(Item item) {
-        return item.isFood() || item == Items.GOLDEN_APPLE || item == Items.ENCHANTED_GOLDEN_APPLE;
+        // Check if item has food component in 1.21.1
+        return item.getComponents().contains(net.minecraft.component.DataComponentTypes.FOOD) || 
+               item == Items.GOLDEN_APPLE || item == Items.ENCHANTED_GOLDEN_APPLE;
     }
 
     private boolean isBuildingBlock(Item item) {
@@ -250,7 +252,7 @@ public class WarehouseBot extends Module {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
         Vec3d target = Vec3d.ofCenter(node);
-        PlayerMovement.humanRotate(mc.player, target);
+        meteordevelopment.meteorclient.utils.player.Rotations.rotate(meteordevelopment.meteorclient.utils.player.Rotations.getYaw(target), meteordevelopment.meteorclient.utils.player.Rotations.getPitch(target));
         Vec3d diff = target.subtract(mc.player.getPos());
         Vec3d dir = new Vec3d(diff.x, 0, diff.z).normalize();
         if (Double.isFinite(dir.x) && Double.isFinite(dir.z)) {

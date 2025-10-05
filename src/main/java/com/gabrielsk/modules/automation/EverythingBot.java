@@ -17,8 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 /**
  * EverythingBot: runs a set of simple automation tasks with legit pacing.
@@ -58,7 +57,6 @@ public class EverythingBot extends Module {
         .name("auto-mine").description("Mine surface coal/iron/copper ores.")
         .defaultValue(false).build());
 
-    private final List<BotTask> tasks = new ArrayList<>();
     private long lastActionAt = 0L;
 
     public EverythingBot() {
@@ -67,11 +65,6 @@ public class EverythingBot extends Module {
 
     @Override
     public void onActivate() {
-        tasks.clear();
-        tasks.add(this::lawnTask);
-        tasks.add(this::torchTask);
-        tasks.add(this::farmTask);
-        tasks.add(this::mineTask);
         lastActionAt = 0L;
     }
 
@@ -85,17 +78,22 @@ public class EverythingBot extends Module {
             if (now - lastActionAt < delay) return;
         }
 
-        for (BotTask task : tasks) {
-            if (task == null) continue;
-            if (task == this::lawnTask && !taskLawn.get()) continue;
-            if (task == this::torchTask && !taskTorch.get()) continue;
-            if (task == this::farmTask && !taskFarm.get()) continue;
-            if (task == this::mineTask && !taskMine.get()) continue;
-
-            if (task.tick(mc)) {
-                lastActionAt = System.currentTimeMillis();
-                break; // one action per tick pacing
-            }
+        // Try each task in order
+        if (taskLawn.get() && lawnTask(mc)) {
+            lastActionAt = System.currentTimeMillis();
+            return;
+        }
+        if (taskTorch.get() && torchTask(mc)) {
+            lastActionAt = System.currentTimeMillis();
+            return;
+        }
+        if (taskFarm.get() && farmTask(mc)) {
+            lastActionAt = System.currentTimeMillis();
+            return;
+        }
+        if (taskMine.get() && mineTask(mc)) {
+            lastActionAt = System.currentTimeMillis();
+            return;
         }
     }
 
@@ -104,7 +102,7 @@ public class EverythingBot extends Module {
         // Reuse the same logic as LawnBot but simplified: break single nearest grass/flower
         BlockPos best = findNearestInRadius((pos) -> {
             var b = mc.world.getBlockState(pos).getBlock();
-            return b == Blocks.GRASS || b == Blocks.TALL_GRASS || b == Blocks.FERN || b == Blocks.DANDELION || b == Blocks.POPPY || b == Blocks.SNOW;
+            return b == Blocks.SHORT_GRASS || b == Blocks.TALL_GRASS || b == Blocks.FERN || b == Blocks.DANDELION || b == Blocks.POPPY || b == Blocks.SNOW;
         });
         if (best == null) return false;
         if (requireLos.get() && !Visibility.hasLineOfSight(mc, Vec3d.ofCenter(best))) return false;
