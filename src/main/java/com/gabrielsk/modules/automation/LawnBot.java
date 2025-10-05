@@ -118,7 +118,7 @@ public class LawnBot extends Module {
         Block block = state.getBlock();
         if (block == Blocks.AIR) return false;
 
-        if (grass.get() && (block instanceof TallPlantBlock || block == Blocks.SHORT_GRASS || block == Blocks.FERN || block == Blocks.TALL_GRASS)) return true;
+        if (grass.get() && (block instanceof TallPlantBlock || block == Blocks.GRASS || block == Blocks.FERN || block == Blocks.TALL_GRASS)) return true;
         if (flowers.get() && (block instanceof FlowerBlock || block instanceof FlowerbedBlock || block == Blocks.DANDELION || block == Blocks.POPPY)) return true;
         if (snow.get() && block == Blocks.SNOW) return true;
         if (leaves.get() && block instanceof LeavesBlock) return true;
