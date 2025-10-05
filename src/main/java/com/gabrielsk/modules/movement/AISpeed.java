@@ -53,37 +53,47 @@ public class AISpeed extends Module {
     }
     
     private void initAI() {
-        behaviorTree = new CompositeNode.Selector(Arrays.asList(
+        behaviorTree = new CompositeNode.Selector(
             createDangerAvoidanceNode(),
             createOptimalSpeedNode(),
             createDefaultMovementNode()
-        ));
+        );
     }
     
     private BehaviorNode createDangerAvoidanceNode() {
-        return new CompositeNode.Sequence(Arrays.asList(
-            (BehaviorNode) () -> avoidDanger.get() && detectDanger() ? BehaviorNode.Status.SUCCESS : BehaviorNode.Status.FAILURE,
-            (BehaviorNode) () -> {
+        return new CompositeNode.Sequence(
+            createNode(() -> avoidDanger.get() && detectDanger() ? BehaviorNode.Status.SUCCESS : BehaviorNode.Status.FAILURE),
+            createNode(() -> {
                 currentSpeed = baseSpeed.get() * 0.5;
                 return BehaviorNode.Status.SUCCESS;
-            }
-        ));
+            })
+        );
     }
     
     private BehaviorNode createOptimalSpeedNode() {
-        return new CompositeNode.Sequence(Arrays.asList(
-            (BehaviorNode) () -> adaptiveSpeed.get() ? BehaviorNode.Status.SUCCESS : BehaviorNode.Status.FAILURE,
-            (BehaviorNode) () -> {
+        return new CompositeNode.Sequence(
+            createNode(() -> adaptiveSpeed.get() ? BehaviorNode.Status.SUCCESS : BehaviorNode.Status.FAILURE),
+            createNode(() -> {
                 currentSpeed = calculateOptimalSpeed();
                 return BehaviorNode.Status.SUCCESS;
-            }
-        ));
+            })
+        );
     }
     
     private BehaviorNode createDefaultMovementNode() {
-        return (BehaviorNode) () -> {
+        return createNode(() -> {
             currentSpeed = baseSpeed.get();
             return BehaviorNode.Status.SUCCESS;
+        });
+    }
+    
+    // Helper to create behavior nodes from lambdas
+    private BehaviorNode createNode(java.util.function.Supplier<BehaviorNode.Status> action) {
+        return new BehaviorNode() {
+            @Override
+            public Status tick() { return action.get(); }
+            @Override
+            public void reset() {}
         };
     }
     

@@ -68,10 +68,30 @@ public class EverythingBot extends Module {
     @Override
     public void onActivate() {
         tasks.clear();
-        tasks.add(this::lawnTask);
-        tasks.add(this::torchTask);
-        tasks.add(this::farmTask);
-        tasks.add(this::mineTask);
+        tasks.add(new BotTask() {
+            @Override
+            public boolean tick(MinecraftClient mc) { return lawnTask(mc); }
+            @Override
+            public String name() { return "Lawn"; }
+        });
+        tasks.add(new BotTask() {
+            @Override
+            public boolean tick(MinecraftClient mc) { return torchTask(mc); }
+            @Override
+            public String name() { return "Torch"; }
+        });
+        tasks.add(new BotTask() {
+            @Override
+            public boolean tick(MinecraftClient mc) { return farmTask(mc); }
+            @Override
+            public String name() { return "Farm"; }
+        });
+        tasks.add(new BotTask() {
+            @Override
+            public boolean tick(MinecraftClient mc) { return mineTask(mc); }
+            @Override
+            public String name() { return "Mine"; }
+        });
         lastActionAt = 0L;
     }
 
@@ -87,10 +107,11 @@ public class EverythingBot extends Module {
 
         for (BotTask task : tasks) {
             if (task == null) continue;
-            if (task == this::lawnTask && !taskLawn.get()) continue;
-            if (task == this::torchTask && !taskTorch.get()) continue;
-            if (task == this::farmTask && !taskFarm.get()) continue;
-            if (task == this::mineTask && !taskMine.get()) continue;
+            String taskName = task.name();
+            if (taskName.equals("Lawn") && !taskLawn.get()) continue;
+            if (taskName.equals("Torch") && !taskTorch.get()) continue;
+            if (taskName.equals("Farm") && !taskFarm.get()) continue;
+            if (taskName.equals("Mine") && !taskMine.get()) continue;
 
             if (task.tick(mc)) {
                 lastActionAt = System.currentTimeMillis();

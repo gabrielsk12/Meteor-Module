@@ -131,7 +131,7 @@ public class PlayerMovement {
         
         // Apply rotation
         mc.player.setYaw(currentYaw);
-        mc.player.setPitch(MathUtils.clamp(currentPitch, -90, 90));
+        mc.player.setPitch((float) MathUtils.clamp(currentPitch, -90, 90));
     }
     
     /**
@@ -151,7 +151,7 @@ public class PlayerMovement {
         
         // Distance-based speed (faster for large movements, slower for precision)
         float distance = (float) Math.sqrt(yawDiff * yawDiff + pitchDiff * pitchDiff);
-        float speed = MathUtils.clamp(distance / 20.0f, 0.05f, 0.3f);
+        float speed = (float) MathUtils.clamp(distance / 20.0f, 0.05f, 0.3f);
         
         // Add micro-corrections (human hand tremor simulation)
         if (distance < 5.0f) {
@@ -281,7 +281,7 @@ public class PlayerMovement {
         currentPitch = MathUtils.lerpAngle(currentPitch, targetPitch, 0.05f);
         
         mc.player.setYaw(currentYaw);
-        mc.player.setPitch(MathUtils.clamp(currentPitch, -30, 30));
+        mc.player.setPitch((float) MathUtils.clamp(currentPitch, -30, 30));
     }
     
     /**

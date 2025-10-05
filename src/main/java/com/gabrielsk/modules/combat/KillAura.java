@@ -96,10 +96,10 @@ public class KillAura extends Module {
     }
     
     private void initBehaviorTree() {
-        behaviorTree = new CompositeNode.Sequence(Arrays.asList(
-            (BehaviorNode) () -> mc.player != null && mc.world != null ? BehaviorNode.Status.SUCCESS : BehaviorNode.Status.FAILURE,
-            (BehaviorNode) () -> findTarget() != null ? BehaviorNode.Status.SUCCESS : BehaviorNode.Status.FAILURE,
-            (BehaviorNode) () -> {
+        behaviorTree = new CompositeNode.Sequence(
+            createNode(() -> mc.player != null && mc.world != null ? BehaviorNode.Status.SUCCESS : BehaviorNode.Status.FAILURE),
+            createNode(() -> findTarget() != null ? BehaviorNode.Status.SUCCESS : BehaviorNode.Status.FAILURE),
+            createNode(() -> {
                 Entity target = findTarget();
                 if (target == null) return BehaviorNode.Status.FAILURE;
                 
@@ -120,8 +120,8 @@ public class KillAura extends Module {
                 }
                 
                 return BehaviorNode.Status.SUCCESS;
-            },
-            (BehaviorNode) () -> {
+            }),
+            createNode(() -> {
                 Entity target = findTarget();
                 if (target == null) return BehaviorNode.Status.FAILURE;
                 
@@ -167,8 +167,18 @@ public class KillAura extends Module {
                 }
                 
                 return BehaviorNode.Status.RUNNING;
-            }
-        ));
+            })
+        );
+    }
+    
+    // Helper to create behavior nodes from lambdas
+    private BehaviorNode createNode(java.util.function.Supplier<BehaviorNode.Status> action) {
+        return new BehaviorNode() {
+            @Override
+            public Status tick() { return action.get(); }
+            @Override
+            public void reset() {}
+        };
     }
     
     @EventHandler
