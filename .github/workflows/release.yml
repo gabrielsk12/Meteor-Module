@@ -1,4 +1,4 @@
-name: Release Source JAR
+name: Build and Release
 
 on:
   push:
@@ -18,15 +18,22 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Create source JAR
-        run: |
-          mkdir -p release
-          zip -r release/meteor-modules-sources.jar src README.md || true
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
+
+      - name: Upload JAR artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: meteor-modules-jars
+          path: build/libs/*.jar
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release/meteor-modules-sources.jar
+            build/libs/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

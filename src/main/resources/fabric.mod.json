@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "meteor-modules",
+  "version": "${version}",
+  "name": "Meteor Modules",
+  "description": "AI-powered Meteor add-on with legit behavior, pathfinding bots, and ML integrations.",
+  "authors": [
+    "gabrielsk12"
+  ],
+  "contact": {
+    "sources": "https://github.com/gabrielsk12/Meteor-Module"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "meteor": [
+      "com.gabrielsk.GabrielSKAddon"
+    ]
+  },
+  "mixins": [],
+  "depends": {
+    "java": ">=21",
+    "minecraft": ">=1.21",
+    "meteor-client": "*"
+  }
+}

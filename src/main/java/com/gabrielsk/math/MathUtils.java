@@ -286,8 +286,8 @@ public class MathUtils {
     /**
      * Calculate optimal surround pattern based on terrain
      */
-    public static List<BlockPos> calculateSurroundPattern(BlockPos center, int range) {
-        List<BlockPos> pattern = new ArrayList<>();
+    public static java.util.List<BlockPos> calculateSurroundPattern(BlockPos center, int range) {
+        java.util.List<BlockPos> pattern = new java.util.ArrayList<>();
         
         // Priority-based surround positions
         int[][] offsets = {

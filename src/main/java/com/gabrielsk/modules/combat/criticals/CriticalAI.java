@@ -1,8 +1,8 @@
 package com.gabrielsk.modules.combat.criticals;
 
-import com.gabrielsk.ai.BehaviorTree;
-import com.gabrielsk.ai.BehaviorTree.*;
-import com.gabrielsk.ai.ThreatAssessment;
+// import com.gabrielsk.ai.BehaviorTree;
+// import com.gabrielsk.ai.BehaviorTree.*;
+// import com.gabrielsk.ai.ThreatAssessment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -19,8 +19,8 @@ public class CriticalAI {
     
     private final MinecraftClient mc;
     private final List<CriticalStrategy> strategies;
-    private final BehaviorTree decisionTree;
-    private final ThreatAssessment threatAssessment;
+    // private final BehaviorTree decisionTree;
+    // private final ThreatAssessment threatAssessment;
     
     private CriticalStrategy lastStrategy;
     private long lastStrategySwitch = 0;
@@ -33,7 +33,7 @@ public class CriticalAI {
     public CriticalAI(MinecraftClient mc) {
         this.mc = mc;
         this.strategies = new ArrayList<>();
-        this.threatAssessment = new ThreatAssessment();
+        // this.threatAssessment = new ThreatAssessment();
         
         // Initialize all strategies
         strategies.add(new PacketCritical());
@@ -42,12 +42,14 @@ public class CriticalAI {
         strategies.add(new MultiPacketCritical());
         
         // Build behavior tree for decision making
-        this.decisionTree = buildDecisionTree();
+        // this.decisionTree = buildDecisionTree();
     }
     
     /**
      * Build behavior tree for intelligent critical decision making
+     * (Commented out until BehaviorTree is implemented)
      */
+    /*
     private BehaviorTree buildDecisionTree() {
         BehaviorTree tree = new BehaviorTree();
         
@@ -74,6 +76,7 @@ public class CriticalAI {
         tree.setRoot(root);
         return tree;
     }
+    */
     
     /**
      * Execute critical with AI decision making
@@ -82,7 +85,7 @@ public class CriticalAI {
         if (mc.player == null || !(target instanceof LivingEntity)) return false;
         
         // Run behavior tree to select strategy
-        decisionTree.tick();
+        // decisionTree.tick();
         
         if (lastStrategy == null) {
             lastStrategy = useBalancedStrategy();
@@ -116,7 +119,8 @@ public class CriticalAI {
             return strategies.get(0); // Default to packet
         }
         
-        double threat = threatAssessment.calculateThreat(living);
+        // double threat = threatAssessment.calculateThreat(living);
+        double threat = 0.5; // Placeholder
         double distance = mc.player.distanceTo(target);
         
         // High threat + close range = fastest strategy
@@ -146,7 +150,8 @@ public class CriticalAI {
         int hostileCount = 0;
         for (Entity entity : nearbyEntities) {
             if (entity instanceof LivingEntity living) {
-                double threat = threatAssessment.calculateThreat(living);
+                // double threat = threatAssessment.calculateThreat(living);
+                double threat = 0.5; // Placeholder
                 if (threat > 0.5) hostileCount++;
             }
         }
