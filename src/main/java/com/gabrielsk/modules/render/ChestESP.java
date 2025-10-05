@@ -44,34 +44,49 @@ public class ChestESP extends Module {
     
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.world == null || mc.player == null) return;
+        // Safety checks
+        if (mc == null || mc.world == null || mc.player == null) return;
+        if (mc.player.isRemoved()) return;
         
-        // Iterate through loaded block entities
-        int range = 128;
-        BlockPos playerPos = mc.player.getBlockPos();
-        for (int x = -range; x <= range; x++) {
-            for (int y = -range; y <= range; y++) {
-                for (int z = -range; z <= range; z++) {
-                    BlockPos pos = playerPos.add(x, y, z);
-                    BlockEntity be = mc.world.getBlockEntity(pos);
-                    if (be == null) continue;
-                    
-                    SettingColor color = null;
-                    
-                    if (chest.get() && be instanceof ChestBlockEntity) {
-                        color = chestColor.get();
-                    } else if (enderChest.get() && be instanceof EnderChestBlockEntity) {
-                        color = enderColor.get();
-                    } else if (shulker.get() && be instanceof ShulkerBoxBlockEntity) {
-                        color = shulkerColor.get();
-                    }
-                    
-                    if (color != null) {
-                        Box box = new Box(be.getPos());
-                        event.renderer.box(box, color, color, shapeMode.get(), 0);
+        try {
+            // Optimized: only check reasonable range and skip if chunk not loaded
+            int range = 64; // Reduced from 128 for performance
+            BlockPos playerPos = mc.player.getBlockPos();
+            
+            for (int x = -range; x <= range; x += 4) { // Step by 4 for performance
+                for (int y = -range; y <= range; y += 4) {
+                    for (int z = -range; z <= range; z += 4) {
+                        BlockPos pos = playerPos.add(x, y, z);
+                        
+                        // Safety: check if chunk is loaded
+                        if (!mc.world.isChunkLoaded(pos)) continue;
+                        
+                        try {
+                            BlockEntity be = mc.world.getBlockEntity(pos);
+                            if (be == null) continue;
+                            
+                            SettingColor color = null;
+                            
+                            if (chest.get() && be instanceof ChestBlockEntity) {
+                                color = chestColor.get();
+                            } else if (enderChest.get() && be instanceof EnderChestBlockEntity) {
+                                color = enderColor.get();
+                            } else if (shulker.get() && be instanceof ShulkerBoxBlockEntity) {
+                                color = shulkerColor.get();
+                            }
+                            
+                            if (color != null) {
+                                Box box = new Box(be.getPos());
+                                event.renderer.box(box, color, color, shapeMode.get(), 0);
+                            }
+                        } catch (Exception e) {
+                            continue; // Skip invalid block entities
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
         }
     }
 }

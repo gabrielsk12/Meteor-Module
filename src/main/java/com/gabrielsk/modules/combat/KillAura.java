@@ -184,53 +184,90 @@ public class KillAura extends Module {
     
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null) return;
+        // Safety checks
+        if (mc == null || mc.player == null || mc.world == null) return;
+        if (mc.player.isRemoved()) return;
         
-        updateThreatMap();
-        tickCounter++;
-        
-        behaviorTree.tick();
+        try {
+            updateThreatMap();
+            tickCounter++;
+            
+            if (behaviorTree != null) {
+                behaviorTree.tick();
+            }
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
+        }
     }
     
     private void updateThreatMap() {
-        threatMap.entrySet().removeIf(entry -> !entry.getKey().isAlive());
-        
-        for (Entity entity : mc.world.getEntities()) {
-            if (isValidTarget(entity)) {
-                ThreatData threat = threatMap.computeIfAbsent(entity, e -> new ThreatData());
-                threat.update((LivingEntity) entity, mc.player);
+        try {
+            threatMap.entrySet().removeIf(entry -> entry == null || entry.getKey() == null || !entry.getKey().isAlive());
+            
+            for (Entity entity : mc.world.getEntities()) {
+                try {
+                    if (isValidTarget(entity)) {
+                        ThreatData threat = threatMap.computeIfAbsent(entity, e -> new ThreatData());
+                        if (threat != null && entity instanceof LivingEntity living) {
+                            threat.update(living, mc.player);
+                        }
+                    }
+                } catch (Exception e) {
+                    continue; // Skip invalid entities
+                }
             }
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
         }
     }
     
     private Entity findTarget() {
         List<Entity> validTargets = new ArrayList<>();
         
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity == mc.player) continue;
-            if (!isValidTarget(entity)) continue;
-            
-            double dist = mc.player.squaredDistanceTo(entity);
-            if (dist > range.get() * range.get()) continue;
-            
-            validTargets.add(entity);
+        try {
+            for (Entity entity : mc.world.getEntities()) {
+                try {
+                    if (entity == null || entity == mc.player) continue;
+                    if (entity.isRemoved() || !entity.isAlive()) continue;
+                    if (!isValidTarget(entity)) continue;
+                    
+                    double dist = mc.player.squaredDistanceTo(entity);
+                    if (dist > range.get() * range.get()) continue;
+                    
+                    validTargets.add(entity);
+                } catch (Exception e) {
+                    continue; // Skip invalid entities
+                }
+            }
+        } catch (Exception e) {
+            return null;
         }
         
         if (validTargets.isEmpty()) return null;
         
-        return switch (targetMode.get()) {
-            case Closest -> findClosest(validTargets);
-            case LowestHealth -> findLowestHealth(validTargets);
-            case HighestThreat -> findHighestThreat(validTargets);
-            case Smart -> findSmartest(validTargets);
-        };
+        try {
+            return switch (targetMode.get()) {
+                case Closest -> findClosest(validTargets);
+                case LowestHealth -> findLowestHealth(validTargets);
+                case HighestThreat -> findHighestThreat(validTargets);
+                case Smart -> findSmartest(validTargets);
+            };
+        } catch (Exception e) {
+            return null;
+        }
     }
     
     private boolean isValidTarget(Entity entity) {
-        if (!(entity instanceof LivingEntity living) || !living.isAlive()) return false;
+        if (entity == null) return false;
+        if (!(entity instanceof LivingEntity living)) return false;
+        if (!living.isAlive() || living.isRemoved()) return false;
         
-        if (players.get() && entity instanceof PlayerEntity) return true;
-        if (mobs.get() && entity instanceof HostileEntity) return true;
+        try {
+            if (players.get() && entity instanceof PlayerEntity) return true;
+            if (mobs.get() && entity instanceof HostileEntity) return true;
+        } catch (Exception e) {
+            return false;
+        }
         
         return false;
     }
@@ -304,9 +341,16 @@ public class KillAura extends Module {
     }
     
     private void attackTarget(Entity target) {
-        mc.interactionManager.attackEntity(mc.player, target);
-        mc.player.swingHand(Hand.MAIN_HAND);
-        lastTarget = target;
+        if (target == null || target.isRemoved()) return;
+        if (mc.interactionManager == null) return;
+        
+        try {
+            mc.interactionManager.attackEntity(mc.player, target);
+            mc.player.swingHand(Hand.MAIN_HAND);
+            lastTarget = target;
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
+        }
     }
     
     private static class ThreatData {

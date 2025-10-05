@@ -40,37 +40,58 @@ public class Replenish extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null) return;
+        // Safety checks
+        if (mc == null || mc.player == null) return;
+        if (mc.player.isRemoved()) return;
 
-        if (tickCounter > 0) {
-            tickCounter--;
-            return;
-        }
+        try {
+            if (tickCounter > 0) {
+                tickCounter--;
+                return;
+            }
 
-        // Check each hotbar slot
-        for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            
-            // Skip if empty or above threshold
-            if (stack.isEmpty() || stack.getCount() >= threshold.get()) continue;
+            // Check each hotbar slot
+            for (int i = 0; i < 9; i++) {
+                try {
+                    ItemStack stack = mc.player.getInventory().getStack(i);
+                    if (stack == null) continue;
+                    
+                    // Skip if empty or above threshold
+                    if (stack.isEmpty() || stack.getCount() >= threshold.get()) continue;
 
-            // Find matching item in inventory
-            int invSlot = findMatchingItem(stack);
-            if (invSlot == -1) continue;
+                    // Find matching item in inventory
+                    int invSlot = findMatchingItem(stack);
+                    if (invSlot == -1) continue;
 
-            // Move items to hotbar
-            InvUtils.move().from(invSlot).to(i);
-            tickCounter = delay.get();
-            return; // Only one refill per cycle
+                    // Move items to hotbar
+                    InvUtils.move().from(invSlot).to(i);
+                    tickCounter = delay.get();
+                    return; // Only one refill per cycle
+                } catch (Exception e) {
+                    continue; // Skip invalid slots
+                }
+            }
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
         }
     }
 
     private int findMatchingItem(ItemStack target) {
-        for (int i = 9; i < mc.player.getInventory().size(); i++) {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            if (!stack.isEmpty() && stack.getItem() == target.getItem()) {
-                return i;
+        if (target == null || target.isEmpty()) return -1;
+        
+        try {
+            for (int i = 9; i < mc.player.getInventory().size(); i++) {
+                try {
+                    ItemStack stack = mc.player.getInventory().getStack(i);
+                    if (stack != null && !stack.isEmpty() && stack.getItem() == target.getItem()) {
+                        return i;
+                    }
+                } catch (Exception e) {
+                    continue; // Skip invalid slots
+                }
             }
+        } catch (Exception e) {
+            // Silently fail
         }
         return -1;
     }

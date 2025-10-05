@@ -27,44 +27,60 @@ public class AutoEat extends Module {
     
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null) return;
+        // Safety checks
+        if (mc == null || mc.player == null || mc.options == null) return;
+        if (mc.player.isRemoved()) return;
         
-        if (eating) {
-            if (eatTimer > 0) {
-                eatTimer--;
-                mc.options.useKey.setPressed(true);
-            } else {
-                mc.options.useKey.setPressed(false);
-                eating = false;
+        try {
+            if (eating) {
+                if (eatTimer > 0) {
+                    eatTimer--;
+                    mc.options.useKey.setPressed(true);
+                } else {
+                    mc.options.useKey.setPressed(false);
+                    eating = false;
+                }
+                return;
             }
-            return;
-        }
-        
-        if (mc.player.getHungerManager().getFoodLevel() >= hunger.get()) return;
-        
-        int foodSlot = -1;
-        int bestFood = 0;
-        
-        for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getStack(i);
-            FoodComponent food = stack.get(net.minecraft.component.DataComponentTypes.FOOD);
             
-            if (food != null) {
-                int nutrition = food.nutrition();
-                if (nutrition > bestFood) {
-                    bestFood = nutrition;
-                    foodSlot = i;
+            if (mc.player.getHungerManager().getFoodLevel() >= hunger.get()) return;
+            
+            int foodSlot = -1;
+            int bestFood = 0;
+            
+            for (int i = 0; i < 9; i++) {
+                try {
+                    ItemStack stack = mc.player.getInventory().getStack(i);
+                    if (stack == null || stack.isEmpty()) continue;
+                    
+                    FoodComponent food = stack.get(net.minecraft.component.DataComponentTypes.FOOD);
+                    
+                    if (food != null) {
+                        int nutrition = food.nutrition();
+                        if (nutrition > bestFood) {
+                            bestFood = nutrition;
+                            foodSlot = i;
+                        }
+                    }
+                } catch (Exception e) {
+                    continue; // Skip invalid slots
                 }
             }
+            
+            if (foodSlot == -1) return;
+            
+            int previousSlot = mc.player.getInventory().selectedSlot;
+            mc.player.getInventory().selectedSlot = foodSlot;
+            
+            mc.options.useKey.setPressed(true);
+            eating = true;
+            eatTimer = 32;
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
+            eating = false;
+            if (mc.options != null) {
+                mc.options.useKey.setPressed(false);
+            }
         }
-        
-        if (foodSlot == -1) return;
-        
-        int previousSlot = mc.player.getInventory().selectedSlot;
-        mc.player.getInventory().selectedSlot = foodSlot;
-        
-        mc.options.useKey.setPressed(true);
-        eating = true;
-        eatTimer = 32;
     }
 }

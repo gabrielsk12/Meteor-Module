@@ -29,38 +29,55 @@ public class FastBreak extends Module {
     
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.interactionManager == null) return;
+        // Safety checks
+        if (mc == null || mc.player == null || mc.interactionManager == null) return;
+        if (mc.player.isRemoved() || mc.world == null || mc.options == null) return;
         
-        if (!mc.options.attackKey.isPressed()) return;
-        
-        HitResult hit = mc.crosshairTarget;
-        if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
-        
-        BlockHitResult blockHit = (BlockHitResult) hit;
-        BlockState state = mc.world.getBlockState(blockHit.getBlockPos());
-        
-        if (autoTool.get()) {
-            int bestSlot = -1;
-            double bestSpeed = 0;
+        try {
+            if (!mc.options.attackKey.isPressed()) return;
             
-            for (int i = 0; i < 9; i++) {
-                ItemStack stack = mc.player.getInventory().getStack(i);
-                double speed = stack.getMiningSpeedMultiplier(state);
+            HitResult hit = mc.crosshairTarget;
+            if (hit == null || hit.getType() != HitResult.Type.BLOCK) return;
+            
+            BlockHitResult blockHit = (BlockHitResult) hit;
+            BlockState state = mc.world.getBlockState(blockHit.getBlockPos());
+            if (state == null) return;
+            
+            if (autoTool.get()) {
+                int bestSlot = -1;
+                double bestSpeed = 0;
                 
-                // Add bonus for enchantments (simplified for MC 1.21+)
-                speed += EnchantmentHelper.getEnchantments(stack).getEnchantments().size() * 2.0;
+                for (int i = 0; i < 9; i++) {
+                    try {
+                        ItemStack stack = mc.player.getInventory().getStack(i);
+                        if (stack == null || stack.isEmpty()) continue;
+                        
+                        double speed = stack.getMiningSpeedMultiplier(state);
+                        
+                        // Add bonus for enchantments (simplified for MC 1.21+)
+                        try {
+                            speed += EnchantmentHelper.getEnchantments(stack).getEnchantments().size() * 2.0;
+                        } catch (Exception e) {
+                            // Enchantment check failed, use base speed
+                        }
+                        
+                        if (speed > bestSpeed) {
+                            bestSpeed = speed;
+                            bestSlot = i;
+                        }
+                    } catch (Exception e) {
+                        continue; // Skip invalid slots
+                    }
+                }
                 
-                if (speed > bestSpeed) {
-                    bestSpeed = speed;
-                    bestSlot = i;
+                if (bestSlot != -1 && mc.player.getInventory().selectedSlot != bestSlot) {
+                    mc.player.getInventory().selectedSlot = bestSlot;
                 }
             }
             
-            if (bestSlot != -1 && mc.player.getInventory().selectedSlot != bestSlot) {
-                mc.player.getInventory().selectedSlot = bestSlot;
-            }
+            mc.interactionManager.updateBlockBreakingProgress(blockHit.getBlockPos(), blockHit.getSide());
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
         }
-        
-        mc.interactionManager.updateBlockBreakingProgress(blockHit.getBlockPos(), blockHit.getSide());
     }
 }

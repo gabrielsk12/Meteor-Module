@@ -58,42 +58,48 @@ public class Velocity extends Module {
     
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (mc.player == null || mc.world == null) return;
+        // Safety checks
+        if (mc == null || mc.player == null || mc.world == null) return;
+        if (mc.player.isRemoved()) return;
         
-        if (event.packet instanceof EntityVelocityUpdateS2CPacket packet) {
-            if (packet.getEntityId() != mc.player.getId()) return;
-            
-            Vec3d velocity = new Vec3d(
-                packet.getVelocityX() / 8000.0,
-                packet.getVelocityY() / 8000.0,
-                packet.getVelocityZ() / 8000.0
-            );
-            
-            Vec3d modifiedVelocity = calculateOptimalVelocity(velocity);
-            
-            if (modifiedVelocity == null) {
-                event.cancel();
-                return;
-            }
-            
-            mc.player.setVelocity(modifiedVelocity);
-            event.cancel();
-            
-            recentEvents.add(new VelocityEvent(velocity, System.currentTimeMillis()));
-            if (recentEvents.size() > 10) recentEvents.poll();
-            lastHitTime = System.currentTimeMillis();
-        }
-        else if (event.packet instanceof ExplosionS2CPacket packet) {
-            Vec3d velocity = new Vec3d(
-                packet.getPlayerVelocityX(),
-                packet.getPlayerVelocityY(),
-                packet.getPlayerVelocityZ()
-            );
-            
-            Vec3d modifiedVelocity = calculateOptimalVelocity(velocity);
-            if (modifiedVelocity != null) {
+        try {
+            if (event.packet instanceof EntityVelocityUpdateS2CPacket packet) {
+                if (packet.getEntityId() != mc.player.getId()) return;
+                
+                Vec3d velocity = new Vec3d(
+                    packet.getVelocityX() / 8000.0,
+                    packet.getVelocityY() / 8000.0,
+                    packet.getVelocityZ() / 8000.0
+                );
+                
+                Vec3d modifiedVelocity = calculateOptimalVelocity(velocity);
+                
+                if (modifiedVelocity == null) {
+                    event.cancel();
+                    return;
+                }
+                
                 mc.player.setVelocity(modifiedVelocity);
+                event.cancel();
+                
+                recentEvents.add(new VelocityEvent(velocity, System.currentTimeMillis()));
+                if (recentEvents.size() > 10) recentEvents.poll();
+                lastHitTime = System.currentTimeMillis();
             }
+            else if (event.packet instanceof ExplosionS2CPacket packet) {
+                Vec3d velocity = new Vec3d(
+                    packet.getPlayerVelocityX(),
+                    packet.getPlayerVelocityY(),
+                    packet.getPlayerVelocityZ()
+                );
+                
+                Vec3d modifiedVelocity = calculateOptimalVelocity(velocity);
+                if (modifiedVelocity != null) {
+                    mc.player.setVelocity(modifiedVelocity);
+                }
+            }
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
         }
     }
     

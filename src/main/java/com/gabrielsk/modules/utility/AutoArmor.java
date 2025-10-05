@@ -26,43 +26,55 @@ public class AutoArmor extends Module {
     
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.player.currentScreenHandler == null) return;
+        // Safety checks
+        if (mc == null || mc.player == null || mc.interactionManager == null) return;
+        if (mc.player.isRemoved() || mc.player.currentScreenHandler == null) return;
         
-        if (timer > 0) {
-            timer--;
-            return;
-        }
-        
-        for (int i = 0; i < 4; i++) {
-            EquipmentSlot slot = getSlot(i);
-            ItemStack current = mc.player.getEquippedStack(slot);
+        try {
+            if (timer > 0) {
+                timer--;
+                return;
+            }
             
-            int bestSlot = -1;
-            double bestValue = getArmorValue(current);
-            
-            for (int j = 0; j < 36; j++) {
-                ItemStack stack = mc.player.getInventory().getStack(j);
-                if (!(stack.getItem() instanceof ArmorItem armor)) continue;
+            for (int i = 0; i < 4; i++) {
+                EquipmentSlot slot = getSlot(i);
+                ItemStack current = mc.player.getEquippedStack(slot);
+                if (current == null) current = ItemStack.EMPTY;
                 
-                if (armor.getSlotType() != slot) continue;
+                int bestSlot = -1;
+                double bestValue = getArmorValue(current);
                 
-                double value = getArmorValue(stack);
-                if (value > bestValue) {
-                    bestValue = value;
-                    bestSlot = j;
+                for (int j = 0; j < 36; j++) {
+                    try {
+                        ItemStack stack = mc.player.getInventory().getStack(j);
+                        if (stack == null || stack.isEmpty()) continue;
+                        if (!(stack.getItem() instanceof ArmorItem armor)) continue;
+                        
+                        if (armor.getSlotType() != slot) continue;
+                        
+                        double value = getArmorValue(stack);
+                        if (value > bestValue) {
+                            bestValue = value;
+                            bestSlot = j;
+                        }
+                    } catch (Exception e) {
+                        continue; // Skip invalid slots
+                    }
+                }
+                
+                if (bestSlot != -1) {
+                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 
+                        bestSlot < 9 ? bestSlot + 36 : bestSlot, 0, SlotActionType.PICKUP, mc.player);
+                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 
+                        8 - i, 0, SlotActionType.PICKUP, mc.player);
+                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 
+                        bestSlot < 9 ? bestSlot + 36 : bestSlot, 0, SlotActionType.PICKUP, mc.player);
+                    timer = delay.get();
+                    break;
                 }
             }
-            
-            if (bestSlot != -1) {
-                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 
-                    bestSlot < 9 ? bestSlot + 36 : bestSlot, 0, SlotActionType.PICKUP, mc.player);
-                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 
-                    8 - i, 0, SlotActionType.PICKUP, mc.player);
-                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 
-                    bestSlot < 9 ? bestSlot + 36 : bestSlot, 0, SlotActionType.PICKUP, mc.player);
-                timer = delay.get();
-                break;
-            }
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
         }
     }
     

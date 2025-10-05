@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -466,10 +467,19 @@ public class AdvancedCrystalAura extends Module {
      * Find crystal slot in hotbar
      */
     private int findCrystalSlot() {
-        for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().getStack(i).getItem() == Items.END_CRYSTAL) {
-                return i;
+        try {
+            for (int i = 0; i < 9; i++) {
+                try {
+                    ItemStack stack = mc.player.getInventory().getStack(i);
+                    if (stack != null && !stack.isEmpty() && stack.getItem() == Items.END_CRYSTAL) {
+                        return i;
+                    }
+                } catch (Exception e) {
+                    continue; // Skip invalid slots
+                }
             }
+        } catch (Exception e) {
+            // Silently fail
         }
         return -1;
     }

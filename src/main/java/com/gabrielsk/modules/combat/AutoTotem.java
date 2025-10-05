@@ -41,33 +41,47 @@ public class AutoTotem extends Module {
     
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.player.currentScreenHandler == null) return;
+        // Safety checks
+        if (mc == null || mc.player == null || mc.interactionManager == null) return;
+        if (mc.player.isRemoved() || mc.player.currentScreenHandler == null) return;
         
-        boolean needsTotem = mc.player.getHealth() + mc.player.getAbsorptionAmount() <= health.get();
-        if (smart.get() && !needsTotem) return;
-        
-    if (elytra.get() && mc.player.isFallFlying()) return;
-        
-        if (mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) return;
-        
-        int totemSlot = -1;
-        for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().getStack(i).getItem() == Items.TOTEM_OF_UNDYING) {
-                totemSlot = i;
-                break;
+        try {
+            boolean needsTotem = mc.player.getHealth() + mc.player.getAbsorptionAmount() <= health.get();
+            if (smart.get() && !needsTotem) return;
+            
+            if (elytra.get() && mc.player.isFallFlying()) return;
+            
+            // Safely check offhand
+            if (mc.player.getOffHandStack() != null && 
+                mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) return;
+            
+            int totemSlot = -1;
+            for (int i = 0; i < 9; i++) {
+                try {
+                    if (mc.player.getInventory().getStack(i) != null &&
+                        mc.player.getInventory().getStack(i).getItem() == Items.TOTEM_OF_UNDYING) {
+                        totemSlot = i;
+                        break;
+                    }
+                } catch (Exception e) {
+                    continue; // Skip invalid slots
+                }
             }
+            
+            if (totemSlot == -1) return;
+            
+            if (legitMode.get()) {
+                long now = System.currentTimeMillis();
+                long delay = Humanizer.reactionMs(swapDelayMs.get(), swapJitter.get());
+                if (now - lastSwapAt < delay) return;
+            }
+            
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId,
+                totemSlot < 9 ? totemSlot + 36 : totemSlot, 40,
+                net.minecraft.screen.slot.SlotActionType.SWAP, mc.player);
+            lastSwapAt = System.currentTimeMillis();
+        } catch (Exception e) {
+            // Silently fail to prevent crashes
         }
-        
-        if (totemSlot == -1) return;
-        
-        if (legitMode.get()) {
-            long now = System.currentTimeMillis();
-            long delay = Humanizer.reactionMs(swapDelayMs.get(), swapJitter.get());
-            if (now - lastSwapAt < delay) return;
-        }
-        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId,
-            totemSlot < 9 ? totemSlot + 36 : totemSlot, 40,
-            net.minecraft.screen.slot.SlotActionType.SWAP, mc.player);
-        lastSwapAt = System.currentTimeMillis();
     }
 }
