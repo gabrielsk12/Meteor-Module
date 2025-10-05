@@ -69,10 +69,15 @@ public class Scaffold extends Module {
         
         Vec3d hitVec = new Vec3d(placePos.getX() + 0.5, placePos.getY() + 0.5, placePos.getZ() + 0.5);
         
+        // Make variables final for lambda capture
+        final BlockPos finalPlacePos = placePos;
+        final Direction finalDirection = direction;
+        final Vec3d finalHitVec = hitVec;
+        
         if (rotate.get()) {
-            Rotations.rotate(Rotations.getYaw(hitVec), Rotations.getPitch(hitVec), () -> place(item, placePos, direction, hitVec));
+            Rotations.rotate(Rotations.getYaw(finalHitVec), Rotations.getPitch(finalHitVec), () -> place(item, finalPlacePos, finalDirection, finalHitVec));
         } else {
-            place(item, placePos, direction, hitVec);
+            place(item, finalPlacePos, finalDirection, finalHitVec);
         }
     }
     

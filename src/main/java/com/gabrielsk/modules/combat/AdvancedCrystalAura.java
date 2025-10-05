@@ -420,7 +420,7 @@ public class AdvancedCrystalAura extends Module {
         BlockPos targetBlock = new BlockPos((int)targetPos.x, (int)targetPos.y, (int)targetPos.z);
         
         // Search around target
-        int range = (int) placeRange.get();
+        int range = placeRange.get().intValue();
         List<ScoredPosition> scored = new ArrayList<>();
         
         for (int x = -range; x <= range; x++) {

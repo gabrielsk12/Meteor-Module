@@ -47,9 +47,8 @@ public class FastBreak extends Module {
                 ItemStack stack = mc.player.getInventory().getStack(i);
                 double speed = stack.getMiningSpeedMultiplier(state);
                 
-                if (EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack) > 0) {
-                    speed += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack) * EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, stack) + 1;
-                }
+                // Add bonus for enchantments (simplified for MC 1.21+)
+                speed += EnchantmentHelper.getEnchantments(stack).getEnchantments().size() * 2.0;
                 
                 if (speed > bestSpeed) {
                     bestSpeed = speed;

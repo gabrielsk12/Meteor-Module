@@ -61,7 +61,7 @@ public class Velocity extends Module {
         if (mc.player == null || mc.world == null) return;
         
         if (event.packet instanceof EntityVelocityUpdateS2CPacket packet) {
-            if (packet.getId() != mc.player.getId()) return;
+            if (packet.getEntityId() != mc.player.getId()) return;
             
             Vec3d velocity = new Vec3d(
                 packet.getVelocityX() / 8000.0,
@@ -128,11 +128,9 @@ public class Velocity extends Module {
             double optimalV = vertical.get();
             
             if (predictLanding.get()) {
-                Vec3d predictedPos = MathUtils.predictPosition(
-                    mc.player.getPos(),
-                    originalVelocity.multiply(optimalH, optimalV, optimalH),
-                    1.0
-                );
+                // Simple position prediction: pos + velocity * time * modifier
+                Vec3d predictedVelocity = originalVelocity.multiply(optimalH, optimalV, optimalH);
+                Vec3d predictedPos = mc.player.getPos().add(predictedVelocity.multiply(1.0));
                 
                 if (wouldLandSafely(predictedPos)) {
                     optimalV = Math.max(optimalV, 0.3);

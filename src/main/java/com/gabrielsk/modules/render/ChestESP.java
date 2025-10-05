@@ -11,6 +11,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.EnderChestBlockEntity;
 import net.minecraft.block.entity.ShulkerBoxBlockEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
 public class ChestESP extends Module {
@@ -43,22 +44,33 @@ public class ChestESP extends Module {
     
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.world == null) return;
+        if (mc.world == null || mc.player == null) return;
         
-        for (BlockEntity be : mc.world.blockEntities) {
-            SettingColor color = null;
-            
-            if (chest.get() && be instanceof ChestBlockEntity) {
-                color = chestColor.get();
-            } else if (enderChest.get() && be instanceof EnderChestBlockEntity) {
-                color = enderColor.get();
-            } else if (shulker.get() && be instanceof ShulkerBoxBlockEntity) {
-                color = shulkerColor.get();
-            }
-            
-            if (color != null) {
-                Box box = new Box(be.getPos());
-                event.renderer.box(box, color, color, shapeMode.get(), 0);
+        // Iterate through loaded block entities
+        int range = 128;
+        BlockPos playerPos = mc.player.getBlockPos();
+        for (int x = -range; x <= range; x++) {
+            for (int y = -range; y <= range; y++) {
+                for (int z = -range; z <= range; z++) {
+                    BlockPos pos = playerPos.add(x, y, z);
+                    BlockEntity be = mc.world.getBlockEntity(pos);
+                    if (be == null) continue;
+                    
+                    SettingColor color = null;
+                    
+                    if (chest.get() && be instanceof ChestBlockEntity) {
+                        color = chestColor.get();
+                    } else if (enderChest.get() && be instanceof EnderChestBlockEntity) {
+                        color = enderColor.get();
+                    } else if (shulker.get() && be instanceof ShulkerBoxBlockEntity) {
+                        color = shulkerColor.get();
+                    }
+                    
+                    if (color != null) {
+                        Box box = new Box(be.getPos());
+                        event.renderer.box(box, color, color, shapeMode.get(), 0);
+                    }
+                }
             }
         }
     }

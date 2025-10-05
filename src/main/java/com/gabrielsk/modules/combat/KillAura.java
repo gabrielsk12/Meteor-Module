@@ -110,8 +110,9 @@ public class KillAura extends Module {
                 }
 
                 if (humanLike.get() && rotate.get()) {
+                    // Simple prediction: add velocity * 0.1 seconds
                     Vec3d targetPos = predictMovement.get() ? 
-                        MathUtils.predictEntityPosition(target, 0.1) : target.getPos();
+                        target.getPos().add(target.getVelocity().multiply(0.1)) : target.getPos();
                     PlayerMovement.humanRotate(mc.player, targetPos);
                     
                     if (random.nextDouble() < 0.05) {
@@ -318,9 +319,10 @@ public class KillAura extends Module {
             
             double healthFactor = (entity.getHealth() + entity.getAbsorptionAmount()) / entity.getMaxHealth();
             
+            // Simple damage factor based on entity type
             double damageFactor = 1.0;
             if (entity instanceof PlayerEntity) {
-                damageFactor = CombatUtils.getPlayerDamage((PlayerEntity) entity);
+                damageFactor = 1.5; // Players are more dangerous
             }
             
             threatLevel = (distFactor * 50) + (healthFactor * 30) + (damageFactor * 20);

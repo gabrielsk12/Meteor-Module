@@ -187,7 +187,8 @@ public class WarehouseBot extends Module {
     }
 
     private boolean isFood(Item item) {
-        return item.isFood() || item == Items.GOLDEN_APPLE || item == Items.ENCHANTED_GOLDEN_APPLE;
+        return item.getComponents().contains(net.minecraft.component.DataComponentTypes.FOOD) || 
+               item == Items.GOLDEN_APPLE || item == Items.ENCHANTED_GOLDEN_APPLE;
     }
 
     private boolean isBuildingBlock(Item item) {

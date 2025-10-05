@@ -47,10 +47,10 @@ public class AutoEat extends Module {
         
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
-            FoodComponent food = stack.getItem().getFoodComponent();
+            FoodComponent food = stack.get(net.minecraft.component.DataComponentTypes.FOOD);
             
             if (food != null) {
-                int nutrition = food.getHunger();
+                int nutrition = food.nutrition();
                 if (nutrition > bestFood) {
                     bestFood = nutrition;
                     foodSlot = i;

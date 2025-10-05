@@ -284,9 +284,9 @@ public class RotationSimulator {
         
         Vec3d targetPos = target.getPos();
         
-        // Predict target position
+        // Predict target position - simple velocity-based prediction
         double predictionTime = 0.1 + (1.0 - HumanBehaviorSimulator.getAimAccuracy("tracking")) * 0.1;
-        Vec3d predictedPos = MathUtils.predictEntityPosition(target, predictionTime);
+        Vec3d predictedPos = target.getPos().add(target.getVelocity().multiply(predictionTime));
         
         // Add tracking error (humans don't track perfectly)
         predictedPos = HumanBehaviorSimulator.addPredictionError(predictedPos);
@@ -294,12 +294,9 @@ public class RotationSimulator {
         // Apply tracking lag (humans react with delay)
         long trackingDelay = (long) (50 + (1.0 - HumanBehaviorSimulator.getFocusLevel()) * 100);
         
-        // Simulate delay by using slightly old target position
-        Vec3d delayedPos = Vec3d.lerp(
-            (double) trackingDelay / 200.0,
-            target.getPos(),
-            predictedPos
-        );
+        // Simulate delay by lerping between current and predicted position
+        double t = (double) trackingDelay / 200.0;
+        Vec3d delayedPos = target.getPos().lerp(predictedPos, t);
         
         return getHumanLikeRotation(delayedPos);
     }

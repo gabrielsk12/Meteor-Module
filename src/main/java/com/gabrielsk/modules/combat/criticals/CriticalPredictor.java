@@ -1,30 +1,27 @@
 package com.gabrielsk.modules.combat.criticals;
 
 import com.gabrielsk.GabrielSKAddon;
-import com.gabrielsk.ai.ml.PlayerBehaviorLearner;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 
 /**
- * Machine Learning predictor for optimal critical timing
- * Learns from player behavior to predict best moments for criticals
+ * Heuristic-based predictor for optimal critical timing
+ * Uses game state to predict best moments for criticals
  */
 public class CriticalPredictor {
     
     private final MinecraftClient mc;
-    private final PlayerBehaviorLearner mlLearner;
     
     private long lastPrediction = 0;
     private static final long PREDICTION_COOLDOWN = 100; // 100ms between predictions
     
     public CriticalPredictor(MinecraftClient mc) {
         this.mc = mc;
-        this.mlLearner = GabrielSKAddon.getMLLearner();
     }
     
     /**
-     * Predict optimal timing for critical hit using ML
+     * Predict optimal timing for critical hit using heuristics
      * @param target The entity to attack
      * @return confidence score (0.0 to 1.0) that now is a good time for critical
      */
@@ -40,37 +37,18 @@ public class CriticalPredictor {
         }
         lastPrediction = now;
         
-        // Get ML prediction from combat network
-        if (mlLearner != null) {
-            double[] prediction = mlLearner.predictCombatAction(living);
-            if (prediction != null && prediction.length >= 4) {
-                // prediction[0] = attack confidence
-                // prediction[1] = defend confidence
-                // prediction[2] = retreat confidence
-                // prediction[3] = strafe confidence
-                
-                // High attack confidence + low defend confidence = good critical timing
-                double attackConf = prediction[0];
-                double defendConf = prediction[1];
-                double retreatConf = prediction[2];
-                
-                // Calculate optimal timing score
-                double timingScore = attackConf * 0.6 - defendConf * 0.2 - retreatConf * 0.2;
-                
-                // Normalize to 0.0-1.0 range
-                return Math.max(0.0, Math.min(1.0, (timingScore + 0.5) / 1.5));
-            }
+        // Use heuristic-based prediction
+        double confidence = 0.5;
+        
+        // Higher confidence if target is low health
+        if (living.getHealth() < living.getMaxHealth() * 0.3) {
+            confidence += 0.2;
         }
         
-        // Fallback: use heuristic prediction
-        return predictHeuristic(living);
-    }
-    
-    /**
-     * Heuristic-based prediction when ML is not available
-     */
-    private double predictHeuristic(LivingEntity target) {
-        double confidence = 0.5;
+        // Higher confidence if player is falling (for vanilla crits)
+        if (mc.player.getVelocity().y < -0.1) {
+            confidence += 0.3;
+        }
         
         // Distance factor (optimal at 3-4 blocks)
         double distance = mc.player.distanceTo(target);
@@ -89,7 +67,7 @@ public class CriticalPredictor {
         }
         
         // Target health factor (better against low health targets)
-        float targetHealthRatio = target.getHealth() / target.getMaxHealth();
+        float targetHealthRatio = living.getHealth() / living.getMaxHealth();
         if (targetHealthRatio < 0.3) {
             confidence += 0.1; // Finish off low health targets
         }
@@ -109,14 +87,10 @@ public class CriticalPredictor {
     }
     
     /**
-     * Record critical attempt for ML learning
+     * Record critical attempt (no-op without ML)
      */
     public void recordCriticalAttempt(Entity target, boolean success, String strategyName) {
-        if (mlLearner != null && target instanceof LivingEntity living) {
-            // Record this as a combat action for learning
-            int action = success ? 0 : 1; // 0 = attack (success), 1 = defend (failed)
-            mlLearner.recordCombatAction(living, action);
-        }
+        // Recording disabled without ML system
     }
     
     /**

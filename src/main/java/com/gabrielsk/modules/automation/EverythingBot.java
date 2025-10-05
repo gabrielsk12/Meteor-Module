@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -125,7 +126,7 @@ public class EverythingBot extends Module {
         // Reuse the same logic as LawnBot but simplified: break single nearest grass/flower
         BlockPos best = findNearestInRadius((pos) -> {
             var b = mc.world.getBlockState(pos).getBlock();
-            return b == Blocks.GRASS || b == Blocks.TALL_GRASS || b == Blocks.FERN || b == Blocks.DANDELION || b == Blocks.POPPY || b == Blocks.SNOW;
+            return b == Blocks.SHORT_GRASS || b == Blocks.TALL_GRASS || b == Blocks.FERN || b == Blocks.DANDELION || b == Blocks.POPPY || b == Blocks.SNOW;
         });
         if (best == null) return false;
         if (requireLos.get() && !Visibility.hasLineOfSight(mc, Vec3d.ofCenter(best))) return false;

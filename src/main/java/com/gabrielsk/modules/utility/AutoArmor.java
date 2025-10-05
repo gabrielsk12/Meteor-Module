@@ -82,11 +82,9 @@ public class AutoArmor extends Module {
         double value = armor.getProtection();
         value += armor.getToughness() / 4.0;
         
-        value += EnchantmentHelper.getLevel(Enchantments.PROTECTION, stack) * 0.25;
-        value += EnchantmentHelper.getLevel(Enchantments.BLAST_PROTECTION, stack) * 0.20;
-        value += EnchantmentHelper.getLevel(Enchantments.FIRE_PROTECTION, stack) * 0.15;
-        value += EnchantmentHelper.getLevel(Enchantments.PROJECTILE_PROTECTION, stack) * 0.15;
-        value += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, stack) * 0.10;
+        // Add enchantment bonuses (simplified for MC 1.21+)
+        // Count total enchantments as bonus
+        value += EnchantmentHelper.getEnchantments(stack).getEnchantments().size() * 0.5;
         
         return value;
     }
