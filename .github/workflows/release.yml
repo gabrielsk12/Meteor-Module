@@ -18,11 +18,10 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew build --no-daemon
+      - name: Package source JAR
+        run: |
+          mkdir -p build/libs
+          cd src && zip -r ../build/libs/meteor-modules-${{ github.ref_name }}-sources.jar . && cd ..
 
       - name: Upload JAR artifacts
         uses: actions/upload-artifact@v4
@@ -35,5 +34,14 @@ jobs:
         with:
           files: |
             build/libs/*.jar
+          body: |
+            # Meteor Modules ${{ github.ref_name }}
+            
+            AI-powered automation modules for Meteor Client with:
+            - Pathfinding-enabled bots (GardenBot, TorchGridBot, WarehouseBot)
+            - Legit behavior (human-like pacing, LOS checks, movement)
+            - Advanced AI systems (behavior trees, ML integration)
+            
+            **Note**: This release contains source code. A full compiled JAR requires resolving API dependencies with the latest Meteor Client version.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
