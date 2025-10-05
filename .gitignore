@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+.gradle/
+build/
+out/
+*.log
+*.iml
+*.class
+*.jar
+!release/*.jar
