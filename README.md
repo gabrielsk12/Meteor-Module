@@ -1,34 +1,66 @@
-# Meteor-Module
+# 🚀 Gabriel_SK Meteor Modules - Survival SMP Edition
 
 [![Release](https://img.shields.io/github/v/release/gabrielsk12/Meteor-Module)](https://github.com/gabrielsk12/Meteor-Module/releases/latest)
 [![Build](https://img.shields.io/github/actions/workflow/status/gabrielsk12/Meteor-Module/release.yml)](https://github.com/gabrielsk12/Meteor-Module/actions)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen)](https://www.minecraft.net/)
+[![License](https://img.shields.io/github/license/gabrielsk12/Meteor-Module)](LICENSE)
 
-AI-powered Meteor Client add-on modules with legit behavior, pathfinding bots, and ML integrations.
+**16 powerful modules** designed for **Survival SMP** gameplay with smart automation and legit behavior.
 
-## Features
+## 🎯 Quick Start
 
-### 🤖 Automation Bots
-- **LawnBot**: Clears grass/flowers/snow/leaves with legit pacing and tool selection
-- **GardenBot**: A* pathfinding-enabled farming bot (harvest/replant with human-like movement)
-- **TorchGridBot**: Grid-based torch placement with combined light evaluation and optional pathfinding
-- **WarehouseBot**: Finds storage (chests/barrels), pathfinds there, and deposits items with keep-filters
-- **EverythingBot**: Multi-task orchestrator (lawn, torch, farm, mine)
+1. **Download** the latest [meteor-modules-1.1.0.jar](https://github.com/gabrielsk12/Meteor-Module/releases/latest)
+2. **Install** Meteor Client 0.5.7+ for Minecraft 1.21.1
+3. **Drop** the JAR into `.minecraft/mods/`
+4. **Launch** and find modules in the "Gabriel_SK" category
 
-### 🎯 Legit Behavior
-- Human-like pacing and reaction times (Humanizer)
-- Line-of-sight and FOV checks (Visibility)
-- Gentle velocity control and rotations (PlayerMovement)
-- Per-module action throttling (LegitController)
+## ✨ Modules (16 Total)
 
-### 🧠 AI Systems (Advanced)
-- Behavior Trees for decision-making
-- GOAP (Goal-Oriented Action Planning)
-- A* pathfinding with octile heuristic and safety constraints
-- ML integration (PlayerBehaviorLearner with GPU acceleration support)
+### 🤖 Automation (11 modules)
+- **AutoMiner** ⛏️ - Smart ore mining (diamonds, debris, emeralds, etc.)
+- **AutoFish** 🎣 - AFK fishing with perfect timing
+- **TreeChopper** 🪓 - Chop entire trees instantly
+- **AutoBreed** 🐄 - Automatic animal breeding
+- **AutoTotem** 💚 - Keep totem in offhand always
+- **GardenBot** 🌾 - A* pathfinding farming bot
+- **LawnBot** 🌿 - Clean grass/flowers/snow
+- **TorchGridBot** 🔥 - Prevent spawns with torch grids
+- **WarehouseBot** 📦 - Auto-sort items to chests
+- **EverythingBot** 🎯 - Multi-task automation
+- **AutoEat** 🍖 - Eat when hungry
 
-### ⚔️ Combat Enhancements
-- Advanced Criticals system with AI/ML strategy selection
-- Legit-aware KillAura, Velocity, Surround, AutoTotem, AdvancedCrystalAura
+### 🛠️ Utilities (5 modules)
+- **AutoTool** 🔧 - Best tool auto-switching
+- **Replenish** ♻️ - Auto-refill hotbar
+- **AutoLog** 🚨 - Emergency disconnect
+- **DeathPosition** 💀 - Save death coords
+- **AutoRespawn** ⚡ - Auto respawn
+
+📖 **[Full Feature Documentation →](FEATURES.md)**
+
+## 🎮 Recommended Combos
+
+**Mining Session:**
+```
+AutoMiner + AutoTool + Replenish + AutoTotem
+```
+
+**AFK Fishing:**
+```
+AutoFish + AutoEat + AutoLog + DeathPosition
+```
+
+**Base Maintenance:**
+```
+LawnBot + TorchGridBot + WarehouseBot
+```
+
+## 🔒 Legit Features
+- ✅ Human-like delays (100-600ms)
+- ✅ Line of sight checks
+- ✅ Natural movement patterns
+- ✅ A* pathfinding
+- ✅ Random timing jitter
 
 ## Installation
 
